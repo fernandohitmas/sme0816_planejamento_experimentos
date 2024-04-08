@@ -15,7 +15,7 @@ alpha <- 0.05
 layout(mat = matrix(c(1,2),2,1, byrow=TRUE),  height = c(1,8))
 # Draw the boxplot and the histogram 
 par(mar=c(0, 3.1, 1.1, 2.1))
-boxplot(maquina1, horizontal=TRUE,  xaxt="n" )#, horizontal=TRUE , ylim=c(-10,20),, col=rgb(0.8,0.8,0,0.5) , frame=F)
+boxplot(maquina1, horizontal=TRUE,  xaxt="n", frame=F )#, horizontal=TRUE , ylim=c(-10,20),, col=rgb(0.8,0.8,0,0.5) , frame=F)
 par(mar=c(4, 3.1, 1.1, 2.1))
 hist(maquina1) #, breaks=40 , col=rgb(0.2,0.8,0.5,0.5) , border=F , main="" , xlab="value of the variable", xlim=c(-10,20))
 
@@ -37,3 +37,4 @@ hist(c(maquina1, maquina2)) #, breaks=40 , col=rgb(0.2,0.8,0.5,0.5) , border=F ,
 
 # Quer-se saber se a média das duas amostras é a mesma
 # H0: mu1 = mu2 x H1: mu1 
+
