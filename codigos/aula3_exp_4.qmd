@@ -1,0 +1,65 @@
+---
+#title: "teste"
+author: "Fernando"
+output: pdf_document
+---
+# Exemplo da Aula
+
+Estudos anteriores indicam que a vida (em horas) de um termopar produzido em uma indústria é uma variável aleatória com distribuição aproximadamente normal. Um grande comprador suspeita que o tempo de vida é inferior a 560 h. Em uma amostra aleatória de 15 termopares adquiridos foram medidos os tempos de vida (em h) 553, 552, 567, 579, 550, 541, 537, 553, 552, 546, 538, 553, 581, 539 e 529. O que os dados permitem concluir sobre a suspeita do comprador?
+
+```{r}
+amostra <- c(553, 552, 567, 579, 550, 541, 537, 553, 552, 546, 538,
+553, 581, 539, 529)
+n <- length(amostra)
+alpha <- 0.05
+```
+
+
+Gráficos de boxplot e histograma dos dados da amostra
+ ```{r, fig.align='right', echo=FALSE}
+#Layout to split the screen
+layout(mat = matrix(c(1,2),2,1, byrow=TRUE),  height = c(1,8))
+#Draw the boxplot and the histogram 
+par(mar=c(0, 3.1, 1.1, 2.1))
+boxplot(amostra, horizontal = TRUE,  xaxt="n")
+par(mar=c(4, 3.1, 1.1, 2.1))
+hist(amostra)
+ ```
+
+
+Quer-se saber se a média das duas amostras é a mesma
+
+$H_0: \mu_1 = 560$
+
+$H_1: \mu_1 < 560$
+
+A estatística de teste é normal padrao:
+
+$$ Z = \dfrac{\mu_0 - \mu}{sd/\sqrt{n}}$$
+
+A partir dos dados podemos calcular:
+
+```{r}
+amostra_mean <- mean(amostra)
+cat("Media da Maquina 1: ", amostra_mean, "\n")
+amostra_var <- var(amostra)
+cat("Variancia da Maquina 2: ", amostra_var, "\n")
+
+```
+
+Regiao critica para distribuicao Normal padrao
+
+```{r}
+li = qt(alpha, n-1)
+cat("Limite Inferior: ", li)
+```
+
+Estatística de teste:
+
+```{r}
+media_0 = 560
+z_obs = (amostra_mean - media_0 )/(sqrt(amostra_var/n))
+cat("A estatistica de teste para o exemplo dado e: ", z_obs)
+```
+
+Como a estatistica de teste esta fora do intervalo de confianca entao rejeitamos a hipotese nula de que as tempo de vida medio e 560

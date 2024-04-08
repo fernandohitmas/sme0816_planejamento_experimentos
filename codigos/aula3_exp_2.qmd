@@ -1,0 +1,113 @@
+---
+#title: "teste"
+author: "Fernando"
+output: pdf_document
+---
+# Exemplo da Aula
+
+Duas máquinas são utilizadas para envasar um líquido em frascos de plástico. Com o objetivo de verificar se há diferença entre os volumes médios envasados, duas amostras de 12 e 10 frascos foram selecionadas. Os volumes (em ml) foram medidos resultando nos seguintes valores:
+
+```{r}
+maquina1 <- c(30.9, 30.9, 30.8, 30.7, 30.9, 30.6, 30.8, 30.9, 30.7, 30.9, 30.7,31.0)
+maquina2 <- c(30.8, 30.9, 30.7, 30.5, 30.5, 30.6, 30.7, 30.3, 30.6, 30.7)
+
+alpha <- 0.05
+```
+
+Gráficos de boxplot e histograma dos dados da máquina 1
+ ```{r, fig.align='right', echo=FALSE}
+#Layout to split the screen
+layout(mat = matrix(c(1,2),2,1, byrow=TRUE),  height = c(1,8))
+#Draw the boxplot and the histogram 
+par(mar=c(0, 3.1, 1.1, 2.1))
+boxplot(maquina1, horizontal = TRUE,  xaxt="n")
+par(mar=c(4, 3.1, 1.1, 2.1))
+hist(maquina1)
+ ```
+
+Gráficos de boxplot e histograma dos dados da máquina 2
+```{r, echo=FALSE}
+#Layout to split the screen
+layout(mat = matrix(c(1,2),2,1, byrow=TRUE),  height = c(1,8))
+#Draw the boxplot and the histogram 
+par(mar=c(0, 3.1, 1.1, 2.1))
+boxplot(maquina2, 
+    horizontal = TRUE,
+    xaxt = "n")
+par(mar=c(4, 3.1, 1.1, 2.1))
+hist(maquina2)
+```
+
+Gráficos de boxplot e histograma dos dados de ambas as máquinas
+```{r, echo=FALSE}
+#Layout to split the screen
+layout(mat = matrix(c(1,2),2,1, byrow=TRUE),  height = c(1,8))
+#Draw the boxplot and the histogram 
+par(mar=c(0, 3.1, 1.1, 2.1))
+boxplot(c(maquina1, maquina2), horizontal=TRUE,  xaxt="n")
+par(mar=c(4, 3.1, 1.1, 2.1))
+hist(c(maquina1, maquina2))
+```
+
+
+Quer-se saber se a média das duas amostras é a mesma
+
+$H_0: \mu_1 = \mu_2$
+
+$H_1: \mu_1$
+
+A estatística de teste é:
+
+$$ T = \dfrac{\bar{Y}_1 - \bar{Y}_2 - 0}{\sqrt{\frac{S_1^2}{n_1} + \frac{S_2^2}{n_2}}} \text{ sob } H_0 \sim t_g$$
+
+Em que 
+
+$$g = \dfrac{\Big(\sqrt{\frac{S_1^2}{n_1} + \frac{S_2^2}{n_2}}\Big)^2}{\frac{(S_1^2/n_1)^2}{n_1-1} + \frac{(S_2^2/n_1)^2}{n_2-1}}$$
+
+A partir dos dados podemos calcular:
+
+```{r}
+y1_mean <- mean(maquina1)
+cat("Media da Maquina 1: ", y1_mean, "\n")
+y2_mean <- mean(maquina2)
+cat("Media da Maquina 2: ", y2_mean, "\n")
+
+y1_var <- var(maquina1)
+cat("Variancia da Maquina 1: ", y1_var, "\n")
+y2_var <- var(maquina2)
+cat("Variancia da Maquina 2: ", y2_var, "\n")
+
+```
+
+O valor de g
+
+```{r}
+g <- (y1_var/length(maquina1) + y2_var/length(maquina2))^2/(((y1_var/length(maquina1))^2)/(length(maquina1)-1) + ((y2_var/length(maquina2))^2)/(length(maquina2)-1))
+cat("Valor de g: ", round(g,0), "\n")
+```
+
+Regiao critica para distribuicao t-Student com g graus de liberdade
+
+```{r}
+ls = qt(1-alpha/2, g)
+cat("Limite Superior: ", ls)
+
+li = qt(alpha/2, g)
+cat("Limite Inferior: ", li)
+
+cat("IC: [",li,";", ls,"]")
+```
+
+Estatística de teste:
+
+```{r}
+t_obs = (y1_mean - y2_mean - 0)/(sqrt(y1_var/length(maquina1) + y2_var/length(maquina2)))
+cat("A estatistica de teste para o exemplo dado e: ", t_obs)
+```
+
+Como a estatistica de teste esta fora do intervalo de confianca entao rejeitamos a hipotese nula de que as medias sao iguais
+
+Utilizando o teste t do proprio R chegamos a mesma conclusao e com os mesmos resultados
+```{r}
+(t.test(maquina1, maquina2, alternative = "two.sided", var.equal=F))
+```
