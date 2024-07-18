@@ -1,0 +1,72 @@
+---
+#title: "teste"
+author: "Fernando"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+---
+# Exercício 4 - Questionário 2
+
+Uma amostra de 100 lâmpadas elétricas produzidas pela fábrica 
+A indica uma vida média de 1.190 horas, com desvio padrão de 90
+horas. Uma amostra de 75 lâmpadas produzidas pela fábrica B indica 
+uma vida média de 1.230 horas, com desvio padrão de 120 horas. 
+Admitindo-se que as variâncias populacionais sejam diferentes, 
+você acha que existe diferença entre as vidas médias populacionais das 
+lâmpadas produzidas pelas fábricas A e B?
+
+```{r}
+fabA_n <- 100
+fabA_mean <- 1190
+fabA_sd <- 90
+
+fabB_n <- 75
+fabB_mean <- 1230
+fabB_sd <- 120
+
+alpha <- 0.05
+```
+
+Quer-se saber se a vida média das lâmpadas das duas fábricas são iguais
+
+$H_0: \mu_1 = \mu_2$
+
+$H_1: \mu_1 \neq \mu_2$
+
+A estatística de teste é:
+
+$$ T = \dfrac{\bar{Y}_1 - \bar{Y}_2 - 0}{\sqrt{\frac{S_1^2}{n_1} + \frac{S_2^2}{n_2}}} \text{ sob } H_0 \sim t_g$$
+
+Em que 
+
+$$g = \dfrac{\Big(\sqrt{\frac{S_1^2}{n_1} + \frac{S_2^2}{n_2}}\Big)^2}{\frac{(S_1^2/n_1)^2}{n_1-1} + \frac{(S_2^2/n_1)^2}{n_2-1}}$$
+
+O valor de g
+
+```{r}
+g <- (fabA_sd^2/fabA_n + fabB_sd^2/fabB_n)^2/(((fabA_sd^2/fabA_n)^2)/(fabA_n-1) + ((fabB_sd^2/fabB_n)^2)/(fabB_n-1))
+cat("Valor de g: ", round(g,0), "\n")
+```
+
+Regiao critica para distribuicao t-Student com g graus de liberdade
+
+```{r}
+ls = qt(1-alpha/2, g)
+cat("Limite Superior: ", ls)
+
+li = qt(alpha/2, g)
+cat("Limite Inferior: ", li)
+
+cat("IC: [",li,";", ls,"]")
+```
+
+Estatística de teste:
+
+```{r}
+t_obs = (fabA_mean - fabB_mean - 0)/(sqrt(fabA_sd^2/fabA_n + fabB_sd^2/fabB_n))
+cat("A estatistica de teste para o exemplo dado e: ", t_obs)
+```
+
+Como a estatistica de teste esta fora do intervalo de confianca entao rejeitamos a hipotese nula de que as medias sao iguais

@@ -1,0 +1,151 @@
+---
+#title: "teste"
+author: "Fernando"
+format:
+  pdf:
+    toc: false
+    number-sections: true
+    colorlinks: true
+# random effects e mixed effect models Efeito aleatório: capitulo 3.9
+---
+
+```{r, echo=FALSE, include=FALSE}
+library(lme4)
+library(ggplot2)
+library(car)
+require(lattice)
+library(nlme)
+
+theme_set(theme_bw())
+theme_update(plot.title = element_text(hjust = 0.5))
+```
+(Fernando Hitoshi Masumoto - 8556609)
+
+# Exercício 3 - Questionário 3 {.unnumbered}
+
+O experimento proposto para o exercício é o de verificação da qualidade de parafusos produzidos por uma fábrica. O cenário analisado é descrito da seguinte maneira: a fábrica possui 4 (quatro) máquinas que fazem o mesmo parafuso, além disso, há 3 operadores que são responsáveis por essa produção. Com isto, o objetivo é verificar se há alguma diferença siginificativa entre os comprimentos (cm) dos parafusos feitos por cada uma das máquinas. 
+
+O modelo de efeitos mistos utilizado para o problema é descrito da seguinte forma:
+
+$$
+y_{i,j} = \mu + \tau_{j} + \beta_{i} + \epsilon_{i,j}
+$$
+
+Em que:
+
+- $y_{i,j}$ é o comprimento observado para um parafuso
+
+- $\mu$ é média geral 
+
+- $\tau_j$ é a interferência do tratamento (máquina)
+
+- $\beta_i$ é a interferência do bloco (operadores)
+
+- $\epsilon_{i,j}$ é o erro aleatório com distribuição $N(0, \sigma^2)$
+
+Para criar uma simulação serão utilizados os seguintes valores de referência, assim como o nível de confiança assumido de 5%:
+
+$\mu = 5$
+
+$\tau_i = \{0.005, 0, -0.01, 0.02\}$ (Comprimento em cm para as máquinas de 1 a 4) para $j = 1,\ldots, 3$
+
+$\beta_j \sim N(0, 1)$ (Comprimento em cm para os operadores de 1 a 3) para $i = 1,\ldots, 4$
+
+$\epsilon_{i,j} \sim N(0, 0.05)$
+
+A simulação envolve 5 (cinco) amostras por operador por máquina, $n = 1$, e portanto, o número total de observações é $N = 60$
+
+```{r}
+set.seed(100)
+mu <- 5
+n_op <- 3
+n_maq <- 4
+n_replica <- 5
+N <- n_op * n_maq * n_replica
+operadores <- c(0.005, -0.005, 0)
+var_maq <- 0.1
+var_erro <- 0.05
+
+media_geral <- rep(mu, N)
+operadores <- rep(operadores, each=n_maq * n_replica)
+erro_por_maq <- rnorm(n_maq, 0, var_maq)
+erro_maq <- rep(erro_por_maq, each = n_replica, times = n_op)
+erro_geral <- round(rnorm(N, 0, var_erro), 4)
+
+observacoes <- media_geral + operadores + erro_maq + erro_geral
+
+nomes_op <- as.factor(c("op1", "op2", "op3"))
+nomes_maq <- as.factor(c("maq1", "maq2", "maq3", "maq4"))
+
+dados <- data.frame(
+  operadores=rep(nomes_op, each=n_maq * n_replica),
+  maquina=rep(nomes_maq, times=n_op * n_replica),
+  obs=observacoes
+)
+#dados$operadores <- as.factor(dados$operadores)
+#dados$maquina <- as.factor(dados$maquina)
+
+#-----------------------------
+
+
+
+
+```
+
+Uma amostra de cinco observações da simulação feita é apresentada a seguir em forma de tabela:
+```{r}
+set.seed(123)
+print(dados[sample(N, 5),])
+```
+
+O gráfico de boxplot para cada operador mostra pouca diferença, visualmente, além do aparente aumento na dispersão dos dados conforme se passa do operador 1 até o 3.
+
+```{r}
+p <- ggplot(dados, aes(x=operadores, y=obs, fill=operadores))+
+  geom_boxplot() 
+p +  labs(
+    x = 'Operadores',
+    y = 'Comprimento',
+    title = 'Observações por operador',
+    fill = 'Operadores'
+  )
+```
+
+Já os boxplots por máquina parecem demonstrar uma divergência maior entre cada uma das máquinas, sendo que os pares de máquinas (2,4) e (1,3) demonstram maior similaridade entre si.
+
+```{r}
+p <- ggplot(dados, aes(x=maquina, y=obs, fill=maquina))+
+  geom_boxplot() 
+p +  labs(
+    x = 'Máquinas',
+    y = 'Comprimento',
+    title = 'Observações por máquina',
+    fill = 'Máquinas'
+  )
+```
+
+Por fim, o último gráfico mostra os dados divididos por operadores e por máquina, o que reforça o comportamento observado no gráfico de boxplot por máquina.
+
+```{r}
+p <- ggplot(dados, aes(x=operadores, y=obs, fill=maquina, hue=maquina))+
+  geom_boxplot() 
+p +  labs(
+    x = 'Operadores',
+    y = 'Comprimento',
+    title = 'Observações por máquina e por operadores',
+    fill = 'Máquina'
+  ) 
+```
+
+O modelo de efeitos mistos é então calculado com a função `lme` do pacote `nlme`
+```{r}
+# Ajuste do modelo com nlme
+modelo_nlme <- lme(fixed = obs ~ operadores, random = ~ 1 | maquina, data = dados)
+
+summary(modelo_nlme)
+
+# Componentes de variância
+var_components_nlme <- VarCorr(modelo_nlme)
+print(var_components_nlme)
+
+```
